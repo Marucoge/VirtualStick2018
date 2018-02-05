@@ -50,7 +50,7 @@ namespace VirtualStick{
         // ドラッグを開始した指の id (フレームをまたいでも多分変わらない方) を記憶しておく。
         public void OnBeginDrag(PointerEventData eventData) {
             if (draggingFingerID != null) { return; } // すでに入力が行われているときは新しく始めない
-            if (Input.touchCount < 1) { return; }
+            //if (Input.touchCount < 1) { return; }
             draggingFingerID = eventData.pointerId;
             Touch touch = Input.GetTouch(draggingFingerID.Value);
             beginDragPosition = touch.position;
@@ -59,10 +59,12 @@ namespace VirtualStick{
 
         // OnBeginDrag で特定した fingerID の指を追跡する。タッチ開始地点からドラッグ先までの距離が入力となる。
         private void Update() {
-            if (Input.touchCount < 1) {
-                ResetInput();
-                return;
-            }
+            // これ自体はバグの原因ではなかったがパッドが複数ある場合のことを想定していなかった。
+            //if (Input.touchCount < 1) {
+            //    ResetInput();
+            //    return;
+            //}
+            //if (draggingFingerID == null) { return; }
 
             Touch draggingTouch = Input.GetTouch(draggingFingerID.Value);
 
@@ -109,9 +111,10 @@ namespace VirtualStick{
 
         // ドラッグ中のものとは違う指が触れた時でも、指が離れた時 OnEndDrag が呼ばれることに注意。
         public void OnEndDrag(PointerEventData eventData) {
-            if (Input.touchCount < 1) { return; }
+            //if (Input.touchCount < 1) { return; }     // VirtualStick を複数配置したときに問題が起きる。
             if (eventData.pointerId != draggingFingerID.Value) { return; } // 追跡していた指以外のものがドラッグ終了した場合...のはずだが稀にごく妙な挙動をする。致命的な問題ではないと思われる。
             draggingFingerID = null;
+            ResetInput();       // これを呼び忘れていたのがバグの原因だった。
         }
         
 
